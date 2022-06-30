@@ -8,6 +8,7 @@ const bootstrap = async () => {
   await db.initialize();
 
   const app = express();
+
   app.use(bodyParser.json());
 
   app.get("/users", async (_, res) => {
@@ -15,7 +16,7 @@ const bootstrap = async () => {
   });
 
   app.post("/users", async (req, res) => {
-    const { username, password, email, firstName, lastName } = req.body; //destructor
+    const { username, password, email, firstName, lastName } = req.body;
 
     if (!username || !password || !email) {
       res.status(400).send({ message: "Missing required fields" });
@@ -23,16 +24,9 @@ const bootstrap = async () => {
     }
 
     const userName = await User.findOne({ where: { username } });
-
-    if (userName) {
-      res.status(400).send({ message: "Username already exists" });
-      return;
-    }
-
     const userEmail = await User.findOne({ where: { email } });
-
-    if (userEmail) {
-      res.status(400).send({ message: "Email already exists" });
+    if (userName || userEmail) {
+      res.status(400).send({ message: "User already exists" });
       return;
     }
 
@@ -40,17 +34,12 @@ const bootstrap = async () => {
     newUser.firstName = firstName;
     newUser.lastName = lastName;
 
-    if (username <= 4) {
-      res
-        .status(400)
-        .send({ message: "Username must be at least 4 characters" });
-      return;
-    }
+    if (username.length <= 4 && username.length > 20) {
+      res.status(400).send({
+        message:
+          "Username must be at least 4 characters and less than 20 characters",
+      });
 
-    if (username.length > 20) {
-      res
-        .status(400)
-        .send({ message: "Username must be less than 20 characters" });
       return;
     }
 
@@ -69,8 +58,8 @@ const bootstrap = async () => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 8);
-
     newUser.password = hashedPassword;
+
     newUser.email = email;
 
     await newUser.save();
@@ -88,25 +77,20 @@ const bootstrap = async () => {
       lastName,
     } = req.body;
 
-    if (!username) {
-      res.status(400).send({ message: "You must provide an username" });
-      return;
-    }
-
-    if (!password) {
-      res.status(400).send({ message: "You must provide a password" });
+    if (!username || !password) {
+      res
+        .status(400)
+        .send({ message: "You must provide a valid username and a password" });
       return;
     }
 
     const user = await User.findOne({ where: { username } });
-
     if (!user) {
-      res.status(400).send({ message: "User not found" });
+      res.status(404).send({ message: "User not found" });
       return;
     }
 
     const verifyPass = await bcrypt.compare(password, user.password);
-
     if (!verifyPass) {
       res.status(403).send({ message: "Incorrect password" });
       return;
@@ -125,7 +109,7 @@ const bootstrap = async () => {
     }
 
     if (newUsername) {
-      if (newUsername <= 4) {
+      if (newUsername.length <= 4) {
         res
           .status(400)
           .send({ message: "Username must be at least 4 characters" });
@@ -143,6 +127,7 @@ const bootstrap = async () => {
         res.status(400).send({ message: "Username cannot contain spaces" });
         return;
       }
+
       user.username = newUsername;
     }
 
@@ -155,7 +140,6 @@ const bootstrap = async () => {
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 8);
-
       user.password = hashedPassword;
     }
 
@@ -165,16 +149,14 @@ const bootstrap = async () => {
 
   app.delete("/users", async (req, res) => {
     const { username } = req.body;
-
     if (!username) {
       res.status(400).send({ message: "Missing required fields" });
       return;
     }
 
     const user = await User.findOne({ where: { username } });
-
     if (!user) {
-      res.status(400).send({ message: "User not found" });
+      res.status(404).send({ message: "User not found" });
       return;
     }
 
