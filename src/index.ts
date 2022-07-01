@@ -201,7 +201,7 @@ const bootstrap = async () => {
 
 	app.get('/me', async (req: myType['req'], res) => {
 		const { tokenAccess } = req.session
-		console.log(tokenAccess)
+
 		if (!tokenAccess) {
 			res.status(401).send({ message: 'You are not logged in' })
 			return
@@ -215,6 +215,17 @@ const bootstrap = async () => {
 		}
 
 		res.status(200).send(user)
+	})
+
+	app.post('/logout', async (req: myType['req'], res) => {
+		const { tokenAccess } = req.session
+		if (!tokenAccess) {
+			res.status(401).send({ message: 'You are not logged in' })
+			return
+		}
+
+		req.session.destroy(console.error)
+		res.status(200).send({ message: true })
 	})
 
 	const port = 4000
