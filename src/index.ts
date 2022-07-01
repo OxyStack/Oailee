@@ -27,8 +27,13 @@ const bootstrap = async () => {
 		session({
 			secret: SESSION_SECRET,
 			resave: false,
-			saveUninitialized: true,
-			cookie: { secure: true },
+			saveUninitialized: false,
+			cookie: {
+				maxAge: 1000 * 60 * 60 * 24 * 7,
+				httpOnly: true,
+				secure: false,
+				sameSite: 'lax',
+			},
 		})
 	)
 
@@ -83,7 +88,6 @@ const bootstrap = async () => {
 		const tokenAccess = jwt.sign({ username, password }, JWT_SECRET, { expiresIn: JWT_EXPIRATION })
 
 		req.session.tokenAccess = tokenAccess
-		req.session.save()
 
 		await newUser.save()
 		res.status(201).send({ newUser, tokenAccess })
@@ -191,9 +195,26 @@ const bootstrap = async () => {
 		const tokenAccess = jwt.sign({ username, password }, JWT_SECRET, { expiresIn: JWT_EXPIRATION })
 
 		req.session.tokenAccess = tokenAccess
-		req.session.save()
 
 		res.status(200).send({ user, tokenAccess })
+	})
+
+	app.get('/me', async (req: myType['req'], res) => {
+		const { tokenAccess } = req.session
+		console.log(tokenAccess)
+		if (!tokenAccess) {
+			res.status(401).send({ message: 'You are not logged in' })
+			return
+		}
+
+		const { username } = jwt.verify(tokenAccess, JWT_SECRET) as { username: string }
+		const user = await User.findOne({ where: { username } })
+		if (!user) {
+			res.status(404).send({ message: 'User not found' })
+			return
+		}
+
+		res.status(200).send(user)
 	})
 
 	const port = 4000
