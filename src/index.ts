@@ -3,7 +3,18 @@ import { User } from './models/user'
 import bodyParser from 'body-parser'
 import bcrypt from 'bcrypt'
 import { dataSource as db } from './dataSource'
-import { MAX_USER_LENGTH, MIN_PASSWORD_LENGTH, MIN_USER_LENGTH, SALT_ROUNDS } from './constants'
+import {
+	JWT_EXPIRATION,
+	JWT_SECRET,
+	MAX_USER_LENGTH,
+	MIN_PASSWORD_LENGTH,
+	MIN_USER_LENGTH,
+	SALT_ROUNDS,
+	SESSION_SECRET,
+} from './constants'
+import session from 'express-session'
+import jwt from 'jsonwebtoken'
+import { myType } from './types'
 
 const bootstrap = async () => {
 	await db.initialize()
@@ -12,11 +23,20 @@ const bootstrap = async () => {
 
 	app.use(bodyParser.json())
 
+	app.use(
+		session({
+			secret: SESSION_SECRET,
+			resave: false,
+			saveUninitialized: true,
+			cookie: { secure: true },
+		})
+	)
+
 	app.get('/users', async (_, res) => {
 		res.status(200).send(await User.find())
 	})
 
-	app.post('/users', async (req, res) => {
+	app.post('/signup', async (req: myType['req'], res) => {
 		const { username, password, email, firstName, lastName } = req.body
 
 		if (!username || !password || !email) {
@@ -60,8 +80,13 @@ const bootstrap = async () => {
 
 		newUser.email = email
 
+		const tokenAccess = jwt.sign({ username, password }, JWT_SECRET, { expiresIn: JWT_EXPIRATION })
+
+		req.session.tokenAccess = tokenAccess
+		req.session.save()
+
 		await newUser.save()
-		res.status(201).send(newUser)
+		res.status(201).send({ newUser, tokenAccess })
 	})
 
 	app.patch('/users', async (req, res) => {
