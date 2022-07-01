@@ -169,6 +169,33 @@ const bootstrap = async () => {
 		res.status(200).send({ message: true })
 	})
 
+	app.post('/login', async (req: myType['req'], res) => {
+		const { username, password } = req.body
+		if (!username || !password) {
+			res.status(400).send({ message: 'Missing required fields' })
+			return
+		}
+
+		const user = await User.findOne({ where: { username } })
+		if (!user) {
+			res.status(404).send({ message: 'User not found' })
+			return
+		}
+
+		const verifyPass = await bcrypt.compare(password, user.password)
+		if (!verifyPass) {
+			res.status(403).send({ message: 'Incorrect password' })
+			return
+		}
+
+		const tokenAccess = jwt.sign({ username, password }, JWT_SECRET, { expiresIn: JWT_EXPIRATION })
+
+		req.session.tokenAccess = tokenAccess
+		req.session.save()
+
+		res.status(200).send({ user, tokenAccess })
+	})
+
 	const port = 4000
 	app.listen(port, () => {
 		console.log(`Server listening on port ${port}`)
