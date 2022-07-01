@@ -1,183 +1,173 @@
-import { DataSource } from 'typeorm'
-import express, { application } from 'express'
-import { User } from './models/user'
-import bodyParser from 'body-parser'
-import bcrypt, { hash } from 'bcrypt'
+import express, { application } from "express";
+import { User } from "./models/user";
+import bodyParser from "body-parser";
+import bcrypt from "bcrypt";
+import { dataSource as db } from "./dataSource";
 
 const bootstrap = async () => {
-	const db = new DataSource({
-		type: 'postgres',
-		host: 'localhost',
-		port: 5432,
-		username: 'oailee-admin',
-		password: 'N0name6355',
-		database: 'oailee',
-		synchronize: true,
-		logging: true,
-		entities: [User],
-	})
+  await db.initialize();
 
-	await db.initialize()
+  const app = express();
 
-	const app = express()
-	app.use(bodyParser.json())
+  app.use(bodyParser.json());
 
-	app.get('/users', async (_, res) => {
-		res.status(200).send(await User.find())
-	})
+  app.get("/users", async (_, res) => {
+    res.status(200).send(await User.find());
+  });
 
-	app.post('/users', async (req, res) => {
-		const { username, password, email, firstName, lastName } = req.body //destructor
+  app.post("/users", async (req, res) => {
+    const { username, password, email, firstName, lastName } = req.body;
 
-		if (!username || !password || !email) {
-			res.status(400).send({ message: 'Missing required fields' })
-			return
-		}
+    if (!username || !password || !email) {
+      res.status(400).send({ message: "Missing required fields" });
+      return;
+    }
 
-		const userName = await User.findOne({ where: { username } })
+    const userName = await User.findOne({ where: { username } });
+    const userEmail = await User.findOne({ where: { email } });
+    if (userName || userEmail) {
+      res.status(400).send({ message: "User already exists" });
+      return;
+    }
 
-		if (userName) {
-			res.status(400).send({ message: 'Username already exists' })
-			return
-		}
+    const newUser = new User();
+    newUser.firstName = firstName;
+    newUser.lastName = lastName;
 
-		const userEmail = await User.findOne({ where: { email } })
+    if (username.length <= 4 && username.length > 20) {
+      res.status(400).send({
+        message:
+          "Username must be at least 4 characters and less than 20 characters",
+      });
 
-		if (userEmail) {
-			res.status(400).send({ message: 'Email already exists' })
-			return
-		}
+      return;
+    }
 
-		const newUser = new User()
-		newUser.firstName = firstName
-		newUser.lastName = lastName
+    if (username.includes(" ")) {
+      res.status(400).send({ message: "Username cannot contain spaces" });
+      return;
+    }
 
-		if (username <= 4) {
-			res.status(400).send({ message: 'Username must be at least 4 characters' })
-			return
-		}
+    newUser.username = username;
 
-		if (username.length > 20) {
-			res.status(400).send({ message: 'Username must be less than 20 characters' })
-			return
-		}
+    if (password.length <= 8) {
+      res
+        .status(400)
+        .send({ message: "Password must be at least 8 characters" });
+      return;
+    }
 
-		if (username.includes(' ')) {
-			res.status(400).send({ message: 'Username cannot contain spaces' })
-			return
-		}
+    const hashedPassword = await bcrypt.hash(password, 8);
+    newUser.password = hashedPassword;
 
-		newUser.username = username
+    newUser.email = email;
 
-		if (password.length <= 8) {
-			res.status(400).send({ message: 'Password must be at least 8 characters' })
-			return
-		}
+    await newUser.save();
+    res.status(201).send(newUser);
+  });
 
-		const hashedPassword = await bcrypt.hash(password, 8)
+  app.patch("/users", async (req, res) => {
+    const {
+      username,
+      newUsername,
+      password,
+      newPassword,
+      email,
+      firstName,
+      lastName,
+    } = req.body;
 
-		newUser.password = hashedPassword
-		newUser.email = email
+    if (!username || !password) {
+      res
+        .status(400)
+        .send({ message: "You must provide a valid username and a password" });
+      return;
+    }
 
-		await newUser.save()
-		res.status(201).send(newUser)
-	})
+    const user = await User.findOne({ where: { username } });
+    if (!user) {
+      res.status(404).send({ message: "User not found" });
+      return;
+    }
 
-	app.patch('/users', async (req, res) => {
-		const { username, newUsername, password, newPassword, email, firstName, lastName } = req.body
+    const verifyPass = await bcrypt.compare(password, user.password);
+    if (!verifyPass) {
+      res.status(403).send({ message: "Incorrect password" });
+      return;
+    }
 
-		if (!username) {
-			res.status(400).send({ message: 'You must provide an username' })
-			return
-		}
+    if (firstName) {
+      user.firstName = firstName;
+    }
 
-		if (!password) {
-			res.status(400).send({ message: 'You must provide a password' })
-			return
-		}
+    if (lastName) {
+      user.lastName = lastName;
+    }
 
-		const user = await User.findOne({ where: { username } })
+    if (email) {
+      user.email = email;
+    }
 
-		if (!user) {
-			res.status(400).send({ message: 'User not found' })
-			return
-		}
+    if (newUsername) {
+      if (newUsername.length <= 4) {
+        res
+          .status(400)
+          .send({ message: "Username must be at least 4 characters" });
+        return;
+      }
 
-		const verifyPass = await bcrypt.compare(password, user.password)
+      if (newUsername.length > 20) {
+        res
+          .status(400)
+          .send({ message: "Username must be less than 20 characters" });
+        return;
+      }
 
-		if (!verifyPass) {
-			res.status(403).send({ message: 'Incorrect password' })
-			return
-		}
+      if (newUsername.includes(" ")) {
+        res.status(400).send({ message: "Username cannot contain spaces" });
+        return;
+      }
 
-		if (firstName) {
-			user.firstName = firstName
-		}
+      user.username = newUsername;
+    }
 
-		if (lastName) {
-			user.lastName = lastName
-		}
+    if (newPassword) {
+      if (newPassword.length <= 8) {
+        res
+          .status(400)
+          .send({ message: "Password must be at least 8 characters" });
+        return;
+      }
 
-		if (email) {
-			user.email = email
-		}
+      const hashedPassword = await bcrypt.hash(newPassword, 8);
+      user.password = hashedPassword;
+    }
 
-		if (newUsername) {
-			if (newUsername <= 4) {
-				res.status(400).send({ message: 'Username must be at least 4 characters' })
-				return
-			}
+    await user.save();
+    res.status(200).send(user);
+  });
 
-			if (newUsername.length > 20) {
-				res.status(400).send({ message: 'Username must be less than 20 characters' })
-				return
-			}
+  app.delete("/users", async (req, res) => {
+    const { username } = req.body;
+    if (!username) {
+      res.status(400).send({ message: "Missing required fields" });
+      return;
+    }
 
-			if (newUsername.includes(' ')) {
-				res.status(400).send({ message: 'Username cannot contain spaces' })
-				return
-			}
-			user.username = newUsername
-		}
+    const user = await User.findOne({ where: { username } });
+    if (!user) {
+      res.status(404).send({ message: "User not found" });
+      return;
+    }
 
-		if (newPassword) {
-			if (newPassword.length <= 8) {
-				res.status(400).send({ message: 'Password must be at least 8 characters' })
-				return
-			}
+    await user.remove();
+    res.status(200).send({ message: true });
+  });
 
-			const hashedPassword = await bcrypt.hash(newPassword, 8)
+  const port = 4000;
+  app.listen(port, () => {
+    console.log(`Server listening on port ${port}`);
+  });
+};
 
-			user.password = hashedPassword
-		}
-
-		await user.save()
-		res.status(200).send(user)
-	})
-
-	app.delete('/users', async (req, res) => {
-		const { username } = req.body
-
-		if (!username) {
-			res.status(400).send({ message: 'Missing required fields' })
-			return
-		}
-
-		const user = await User.findOne({ where: { username } })
-
-		if (!user) {
-			res.status(400).send({ message: 'User not found' })
-			return
-		}
-
-		await user.remove()
-		res.status(200).send({ message: true })
-	})
-
-	const port = 4000
-	app.listen(port, () => {
-		console.log(`Server listening on port ${port}`)
-	})
-}
-
-bootstrap().catch(err => console.error(err))
+bootstrap().catch((err) => console.error(err));
