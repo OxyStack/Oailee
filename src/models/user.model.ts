@@ -23,6 +23,9 @@ export class User extends BaseEntity {
 	@Column({ type: 'text', nullable: true })
 	role!: string
 
+	@Column({ type: 'text', nullable: true })
+	profile_img?: string
+
 	@Column({ type: 'date', nullable: true })
 	createdAt: Date = new Date()
 }
