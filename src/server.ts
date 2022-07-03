@@ -1,8 +1,9 @@
-import express, { application } from 'express'
+import express from 'express'
 import bodyParser from 'body-parser'
 import { dataSource as db } from './dataSource'
-import { SESSION_SECRET } from './constants'
+import { PORT, SESSION_SECRET } from './constants'
 import session from 'express-session'
+import { router as userRouter } from './routes/user.route'
 
 const bootstrap = async () => {
 	await db.initialize()
@@ -10,6 +11,7 @@ const bootstrap = async () => {
 	const app = express()
 
 	app.use(bodyParser.json())
+	app.use(bodyParser.urlencoded({ extended: true }))
 
 	app.use(
 		session({
@@ -25,11 +27,10 @@ const bootstrap = async () => {
 		})
 	)
 
-	app.use('/', require('./routes/users.route'))
+	app.use('/', userRouter)
 
-	const port = 4000
-	app.listen(port, () => {
-		console.log(`Server listening on port ${port}`)
+	app.listen(PORT, () => {
+		console.log(`Server listening on port ${PORT}`)
 	})
 }
 

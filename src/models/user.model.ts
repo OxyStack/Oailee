@@ -20,12 +20,12 @@ export class User extends BaseEntity {
 	@Column({ type: 'text', unique: true, nullable: false })
 	email!: string
 
-	@Column({ type: 'text', nullable: true })
+	@Column({ type: 'enum', enum: ['admin', 'user'], default: 'user' })
 	role!: string
 
 	@Column({ type: 'text', nullable: true })
 	profile_img?: string
 
-	@Column({ type: 'date', nullable: true })
-	createdAt: Date = new Date()
+	@Column({ type: 'date', default: () => 'CURRENT_DATE' })
+	createdAt!: Date
 }

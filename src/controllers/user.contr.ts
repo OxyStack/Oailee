@@ -1,4 +1,3 @@
-import express from 'express'
 import { User } from '../models/user.model'
 import bcrypt from 'bcrypt'
 import {
@@ -10,15 +9,12 @@ import {
 	SALT_ROUNDS,
 } from '../constants'
 import jwt from 'jsonwebtoken'
-import { myType } from '../types'
 
-const router = express.Router()
-
-router.get('/users', async (_, res) => {
+export const getUsers = async (_: any, res: any) => {
 	res.status(200).send(await User.find())
-})
+}
 
-router.post('/signup', async (req: myType['req'], res) => {
+export const signup = async (req: any, res: any) => {
 	const { username, password, email, firstName, lastName } = req.body
 
 	if (!username || !password || !email) {
@@ -63,15 +59,15 @@ router.post('/signup', async (req: myType['req'], res) => {
 
 	newUser.email = email
 
-	const tokenAccess = jwt.sign({ username, password }, JWT_SECRET, { expiresIn: JWT_EXPIRATION })
+	const accessToken = jwt.sign({ username, password }, JWT_SECRET, { expiresIn: JWT_EXPIRATION })
 
-	req.session.tokenAccess = tokenAccess
+	req.session.accessToken = accessToken
 
 	await newUser.save()
-	res.status(201).send({ newUser, tokenAccess })
-})
+	res.status(201).send({ newUser, accessToken })
+}
 
-router.patch('/update-user', async (req, res) => {
+export const updateUser = async (req: any, res: any) => {
 	const { username, newUsername, password, newPassword, email, firstName, lastName } = req.body
 
 	if (!username || !password) {
@@ -132,9 +128,9 @@ router.patch('/update-user', async (req, res) => {
 
 	await user.save()
 	res.status(200).send(user)
-})
+}
 
-router.delete('/delete-user', async (req, res) => {
+export const deleteUser = async (req: any, res: any) => {
 	const { username } = req.body
 	if (!username) {
 		res.status(400).send({ message: 'Missing required fields' })
@@ -149,9 +145,9 @@ router.delete('/delete-user', async (req, res) => {
 
 	await user.remove()
 	res.status(200).send({ message: true })
-})
+}
 
-router.post('/login', async (req: myType['req'], res) => {
+export const login = async (req: any, res: any) => {
 	const { username, password } = req.body
 	if (!username || !password) {
 		res.status(400).send({ message: 'Missing required fields' })
@@ -170,22 +166,22 @@ router.post('/login', async (req: myType['req'], res) => {
 		return
 	}
 
-	const tokenAccess = jwt.sign({ username, password }, JWT_SECRET, { expiresIn: JWT_EXPIRATION })
+	const accessToken = jwt.sign({ username, password }, JWT_SECRET, { expiresIn: JWT_EXPIRATION })
 
-	req.session.tokenAccess = tokenAccess
+	req.session.accessToken = accessToken
 
 	res.status(200).send(user)
-})
+}
 
-router.get('/me', async (req: myType['req'], res) => {
-	const { tokenAccess } = req.session
+export const me = async (req: any, res: any) => {
+	const { accessToken } = req.session
 
-	if (!tokenAccess) {
+	if (!accessToken) {
 		res.status(401).send({ message: 'You are not logged in' })
 		return
 	}
 
-	const { username } = jwt.verify(tokenAccess, JWT_SECRET) as { username: string }
+	const { username } = jwt.verify(accessToken, JWT_SECRET) as { username: string }
 	const user = await User.findOne({ where: { username } })
 	if (!user) {
 		res.status(404).send({ message: 'User not found' })
@@ -193,17 +189,15 @@ router.get('/me', async (req: myType['req'], res) => {
 	}
 
 	res.status(200).send(user)
-})
+}
 
-router.post('/logout', async (req: myType['req'], res) => {
-	const { tokenAccess } = req.session
-	if (!tokenAccess) {
+export const logout = async (req: any, res: any) => {
+	const { accessToken } = req.session
+	if (!accessToken) {
 		res.status(401).send({ message: 'You are not logged in' })
 		return
 	}
 
-	req.session.destroy(error => console.error(error))
+	req.session.destroy((error: any) => console.error(error))
 	res.status(200).send({ message: true })
-})
-
-module.exports = router
+}
