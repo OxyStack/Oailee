@@ -1,5 +1,6 @@
 import { DataSource } from 'typeorm'
 import { User } from './models/user.model'
+import { Link } from './models/link.model'
 
 export const dataSource = new DataSource({
 	type: 'postgres',
@@ -8,7 +9,7 @@ export const dataSource = new DataSource({
 	username: 'oailee-admin',
 	password: 'N0name6355',
 	database: 'oailee',
-	entities: [User],
+	entities: [User, Link],
 	synchronize: true,
 	logging: true,
 })

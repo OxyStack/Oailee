@@ -4,11 +4,15 @@ import { dataSource as db } from './dataSource'
 import { PORT, SESSION_SECRET } from './constants'
 import session from 'express-session'
 import { router as userRouter } from './routes/user.route'
+import { router as linkRouter } from './routes/link.route'
 
 const bootstrap = async () => {
 	await db.initialize()
 
 	const app = express()
+
+	app.set('views', './src/views')
+	app.set('view engine', 'ejs')
 
 	app.use(bodyParser.json())
 	app.use(bodyParser.urlencoded({ extended: true }))
@@ -28,6 +32,10 @@ const bootstrap = async () => {
 	)
 
 	app.use('/', userRouter)
+	app.use('/', linkRouter)
+	app.get('/', (_, res) => {
+		res.render('index')
+	})
 
 	app.listen(PORT, () => {
 		console.log(`Server listening on port ${PORT}`)

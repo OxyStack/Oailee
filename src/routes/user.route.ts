@@ -1,7 +1,4 @@
 import express from 'express'
-
-export const router = express.Router()
-
 import {
 	getUsers,
 	signup,
@@ -11,6 +8,8 @@ import {
 	me,
 	logout,
 } from '../controllers/user.contr'
+
+export const router = express.Router()
 
 router.get('/getusers', getUsers)
 router.post('/signup', signup)
