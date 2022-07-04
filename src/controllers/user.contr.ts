@@ -1,3 +1,4 @@
+import express from 'express'
 import { User } from '../models/user.model'
 import bcrypt from 'bcrypt'
 import {
@@ -9,13 +10,14 @@ import {
 	SALT_ROUNDS,
 } from '../constants'
 import jwt from 'jsonwebtoken'
+import { myType } from '../types'
 
-export const getUsers = async (_: any, res: any) => {
+export const getUsers = async (_: express.Request, res: express.Response) => {
 	res.status(200).send(await User.find())
 }
 
-export const signup = async (req: any, res: any) => {
-	const { username, password, email, firstName, lastName } = req.body
+export const signup = async (req: myType['req'], res: express.Response) => {
+	const { username, password, email, firstName, lastName, avatar } = req.body
 
 	if (!username || !password || !email) {
 		res.status(400).send({ message: 'Missing required fields' })
@@ -67,8 +69,9 @@ export const signup = async (req: any, res: any) => {
 	res.status(201).send({ newUser, accessToken })
 }
 
-export const updateUser = async (req: any, res: any) => {
-	const { username, newUsername, password, newPassword, email, firstName, lastName } = req.body
+export const updateUser = async (req: express.Request, res: express.Response) => {
+	const { username, newUsername, password, newPassword, email, firstName, lastName, profile_img } =
+		req.body
 
 	if (!username || !password) {
 		res.status(400).send({ message: 'You must provide a valid username and a password' })
@@ -130,7 +133,7 @@ export const updateUser = async (req: any, res: any) => {
 	res.status(200).send(user)
 }
 
-export const deleteUser = async (req: any, res: any) => {
+export const deleteUser = async (req: express.Request, res: express.Response) => {
 	const { username } = req.body
 	if (!username) {
 		res.status(400).send({ message: 'Missing required fields' })
@@ -147,7 +150,7 @@ export const deleteUser = async (req: any, res: any) => {
 	res.status(200).send({ message: true })
 }
 
-export const login = async (req: any, res: any) => {
+export const login = async (req: any, res: express.Response) => {
 	const { username, password } = req.body
 	if (!username || !password) {
 		res.status(400).send({ message: 'Missing required fields' })
@@ -173,7 +176,7 @@ export const login = async (req: any, res: any) => {
 	res.status(200).send(user)
 }
 
-export const me = async (req: any, res: any) => {
+export const me = async (req: any, res: express.Response) => {
 	const { accessToken } = req.session
 
 	if (!accessToken) {
@@ -191,7 +194,7 @@ export const me = async (req: any, res: any) => {
 	res.status(200).send(user)
 }
 
-export const logout = async (req: any, res: any) => {
+export const logout = async (req: any, res: express.Response) => {
 	const { accessToken } = req.session
 	if (!accessToken) {
 		res.status(401).send({ message: 'You are not logged in' })
