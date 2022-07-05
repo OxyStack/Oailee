@@ -13,7 +13,7 @@ function Home() {
 				<p className="text-3xl font-bold underline">Hello Vite + React!</p>
 
 				<p>
-					<button type="button" onClick={() => setCount(() => count + 1)}>
+					<button className="btn-primary" type="button" onClick={() => setCount(() => count + 1)}>
 						count is:
 						{count}
 					</button>
