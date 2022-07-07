@@ -1,7 +1,22 @@
 {
+	"name": "oailee",
+	"description": "",
+	"version": "1.0.0",
+	"main": "index.js",
 	"scripts": {
 		"prepare": "husky install client"
 	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/OxyStack/Oailee.git"
+	},
+	"keywords": [],
+	"author": "OxyStack",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/OxyStack/Oailee/issues"
+	},
+	"homepage": "https://github.com/OxyStack/Oailee#readme",
 	"devDependencies": {
 		"husky": "^8.0.1"
 	}
