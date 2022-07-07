@@ -1,12 +1,11 @@
-import { Button } from 'react-daisyui'
 import { Navbar } from '../../components'
+import UserList from './components/UserList'
 
 function Dashboard() {
 	return (
 		<div>
 			<Navbar />
-			<h1>Dashboard</h1>
-			<Button color="primary">Click me</Button>
+			<UserList />
 		</div>
 	)
 }

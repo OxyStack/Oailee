@@ -11,7 +11,7 @@ import {
 
 export const router = express.Router()
 
-router.get('/getusers', getUsers)
+router.get('/api/getusers', getUsers)
 router.post('/signup', signup)
 router.patch('/updateuser', updateUser)
 router.delete('/deleteuser', deleteUser)

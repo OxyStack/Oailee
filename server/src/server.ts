@@ -1,5 +1,6 @@
 import express from 'express'
 import bodyParser from 'body-parser'
+import cors from 'cors'
 import { dataSource as db } from './dataSource'
 import { PORT, SESSION_SECRET } from './constants'
 import session from 'express-session'
@@ -16,6 +17,8 @@ const bootstrap = async () => {
 
 	app.use(bodyParser.json())
 	app.use(bodyParser.urlencoded({ extended: true }))
+
+	app.use(cors())
 
 	app.use(
 		session({
