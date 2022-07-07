@@ -16,6 +16,6 @@
 		"noEmit": true,
 		"jsx": "react-jsx"
 	},
-	"include": ["src", "windi.config.ts", ".eslintrc.json", "vite.config.ts"],
+	"include": ["src", ".eslintrc.json", "vite.config.ts", "tailwind.config.js", "postcss.config.js"],
 	"references": [{ "path": "./tsconfig.node.json" }]
 }

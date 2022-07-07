@@ -19,5 +19,8 @@
 	"homepage": "https://github.com/OxyStack/Oailee#readme",
 	"devDependencies": {
 		"husky": "^8.0.1"
+	},
+	"dependencies": {
+		"npm": "^8.13.2"
 	}
 }
