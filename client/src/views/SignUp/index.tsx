@@ -7,15 +7,20 @@ function SignUp() {
 						<form className="form-control">
 							<label className="label" htmlFor="username">
 								<span className="label-text text text-accent">Username</span>
-								<input type="text" placeholder="username" className="input input-bordered" />
+								<input type="text" placeholder="username" className="input input-bordered" autoComplete="on" />
 							</label>
 							<label className="label" htmlFor="email">
 								<span className="label-text text text-accent">Email</span>
-								<input type="text" placeholder="mail@example.com" className="input input-bordered" />
+								<input type="text" placeholder="mail@example.com" className="input input-bordered" autoComplete="on" />
 							</label>
 							<label className="label" htmlFor="password">
 								<span className="label-text text text-primary">Password</span>
-								<input type="password" placeholder="min. 8 characters" className="input input-bordered" />
+								<input
+									type="password"
+									placeholder="min. 8 characters"
+									className="input input-bordered"
+									autoComplete="on"
+								/>
 							</label>
 						</form>
 					</div>
