@@ -31,7 +31,6 @@
 		"quotes": ["error", "single"],
 		"@typescript-eslint/quotes": ["error", "single"],
 
-		// "react/jsx-uses-react": "off",
 		"react/react-in-jsx-scope": "off",
 		"react/prop-types": "off",
 		"@typescript-eslint/explicit-function-return-type": "off",
@@ -55,6 +54,15 @@
 				"components": ["Link"],
 				"specialLink": ["hrefLeft", "hrefRight"],
 				"aspects": ["invalidHref", "preferButton"]
+			}
+		],
+		"jsx-a11y/label-has-associated-control": [
+			2,
+			{
+				"labelComponents": ["CustomInputLabel"],
+				"labelAttributes": ["label"],
+				"controlComponents": ["CustomInput"],
+				"depth": 3
 			}
 		]
 	}

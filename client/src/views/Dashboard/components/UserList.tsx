@@ -1,31 +1,47 @@
-import React from 'react'
-import axios from 'axios'
-import API_URL from '../../../constants'
+import { useState, useEffect } from 'react'
+import axios from '../../../api/axios'
 
-export default class UserList extends React.Component {
-	// eslint-disable-next-line react/state-in-constructor
-	state = {
-		users: [],
-	}
+function UserList() {
+	const [users, setUsers] = useState([])
 
-	componentDidMount() {
-		axios.get(`${API_URL}/getusers`).then((res) => {
-			const users = res.data
-			this.setState({ users })
-		})
-	}
+	useEffect(() => {
+		let mounted = true
+		const controller = new AbortController()
 
-	render() {
-		return (
+		const getUsers = async () => {
+			try {
+				const response = await axios.get('/getusers', { signal: controller.signal })
+				// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+				mounted && setUsers(response.data)
+			} catch (error) {
+				console.log(error)
+			}
+		}
+		getUsers()
+
+		return () => {
+			mounted = false
+			controller.abort()
+		}
+	}, [])
+
+	return (
+		<div>
+			<h1>User List</h1>
 			<ul>
-				{/* eslint-disable-next-line react/destructuring-assignment */}
-				{this.state.users.map((user: any) => (
-					<li key={user.id}>
-						{user.username}
-						{user.email}{' '}
-					</li>
-				))}
+				{users?.length ? (
+					<ul>
+						{users.map((user: any, i) => (
+							// eslint-disable-next-line react/no-array-index-key
+							<li key={i}>{user.username}</li>
+						))}
+					</ul>
+				) : (
+					<p>Loading...</p>
+				)}
 			</ul>
-		)
-	}
+		</div>
+	)
 }
+
+export default UserList

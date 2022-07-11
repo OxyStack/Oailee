@@ -1,6 +1,6 @@
 import { Breadcrumbs, Button, Form, Hero, Input, Link } from 'react-daisyui'
 import Copyright from '../../components/Copyright'
-import signInBg from './assets/sign-in-bg.svg'
+import signInBg from '../../assets/sign-in-bg.svg'
 
 function SignIn() {
 	return (

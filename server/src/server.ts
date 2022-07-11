@@ -13,7 +13,6 @@ const bootstrap = async () => {
 	const app = express()
 
 	app.set('views', './src/views')
-	app.set('view engine', 'ejs')
 
 	app.use(bodyParser.json())
 	app.use(bodyParser.urlencoded({ extended: true }))

@@ -1,35 +1,79 @@
-function SignUp() {
-	return (
-		<div>
-			<div className="grid grid-cols-2 gap-4">
-				<div className="flex flex-col">
-					<div className="p-10 card bg-base-200">
-						<form className="form-control">
-							<label className="label" htmlFor="username">
-								<span className="label-text text text-accent">Username</span>
-								<input type="text" placeholder="username" className="input input-bordered" autoComplete="on" />
-							</label>
-							<label className="label" htmlFor="email">
-								<span className="label-text text text-accent">Email</span>
-								<input type="text" placeholder="mail@example.com" className="input input-bordered" autoComplete="on" />
-							</label>
-							<label className="label" htmlFor="password">
-								<span className="label-text text text-primary">Password</span>
-								<input
-									type="password"
-									placeholder="min. 8 characters"
-									className="input input-bordered"
-									autoComplete="on"
-								/>
-							</label>
-						</form>
-					</div>
+import { Component, ChangeEvent } from 'react'
+import IUser from '../../types'
+import SignupService from '../../services/signup.service'
 
-					<div className="flex flex-col" />
-				</div>
-			</div>
-		</div>
-	)
+type Props = {}
+type State = IUser & {
+	submited: boolean
 }
 
-export default SignUp
+export default class SignUp extends Component<Props, State> {
+	constructor(props: Props) {
+		super(props)
+		this.onChangeUsername = this.onChangeUsername.bind(this)
+		this.onChangePassword = this.onChangePassword.bind(this)
+		this.onChangeEmail = this.onChangeEmail.bind(this)
+		this.state = {
+			username: '',
+			password: '',
+			email: '',
+			submited: false,
+		}
+	}
+
+	onChangeUsername(e: ChangeEvent<HTMLInputElement>) {
+		this.setState({ username: e.target.value })
+	}
+
+	onChangePassword(e: ChangeEvent<HTMLInputElement>) {
+		this.setState({ password: e.target.value })
+	}
+
+	onChangeEmail(e: ChangeEvent<HTMLInputElement>) {
+		this.setState({ email: e.target.value })
+	}
+
+	saveUser() {
+		const { username, password, email } = this.state
+
+		SignupService.createUser({ username, password, email })
+			.then(() => {
+				this.setState({ submited: true })
+			})
+			.catch(() => {
+				this.setState({ submited: false })
+			})
+	}
+
+	render() {
+		const { username, password, email, submited } = this.state
+		return (
+			<div>
+				<h1>Sign Up</h1>
+				<div>
+					<label>
+						Username
+						<input type="text" value={username} onChange={this.onChangeUsername} />
+					</label>
+				</div>
+				<div>
+					<label>
+						Password
+						<input type="password" value={password} onChange={this.onChangePassword} />
+					</label>
+				</div>
+				<div>
+					<label>
+						Email
+						<input type="email" value={email} onChange={this.onChangeEmail} />
+					</label>
+				</div>
+
+				<button type="submit" onClick={() => this.saveUser()}>
+					Sign Up
+				</button>
+				{submited && <div>User created</div>}
+			</div>
+		)
+	}
+}
