@@ -1,7 +1,7 @@
 import express from 'express'
 import {
 	getUsers,
-	signup,
+	signUp,
 	updateUser,
 	deleteUser,
 	login,
@@ -12,7 +12,7 @@ import {
 export const router = express.Router()
 
 router.get('/api/getusers', getUsers)
-router.post('/api/signup', signup)
+router.post('/api/signup', signUp)
 router.patch('/api/updateuser', updateUser)
 router.delete('/api/deleteuser', deleteUser)
 router.post('/api/login', login)

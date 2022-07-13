@@ -1,7 +1,7 @@
 import { Navbar } from '../../components'
 import UserList from './components/UserList'
 
-function Dashboard() {
+const Dashboard = () => {
 	return (
 		<div>
 			<Navbar />

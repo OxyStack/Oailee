@@ -1,7 +1,5 @@
 // import './styles/home.css'
 
-function Home() {
-	return <div />
-}
+const Home = () => <div />
 
 export default Home

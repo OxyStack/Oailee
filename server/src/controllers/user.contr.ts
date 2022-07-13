@@ -16,7 +16,7 @@ export const getUsers = async (_: express.Request, res: express.Response) => {
 	res.status(200).send(await User.find())
 }
 
-export const signup = async (req: myType['req'], res: express.Response) => {
+export const signUp = async (req: myType['req'], res: express.Response) => {
 	const { username, password, email, firstName, lastName, avatar } = req.body
 
 	if (!username || !password || !email) {
@@ -40,15 +40,12 @@ export const signup = async (req: myType['req'], res: express.Response) => {
 		res.status(400).send({
 			message: 'Username must be at least 4 characters and less than 20 characters',
 		})
-
 		return
 	}
-
 	if (username.includes(' ')) {
 		res.status(400).send({ message: 'Username cannot contain spaces' })
 		return
 	}
-
 	newUser.username = username
 
 	if (password.length <= MIN_PASSWORD_LENGTH) {
@@ -150,7 +147,7 @@ export const deleteUser = async (req: express.Request, res: express.Response) =>
 	res.status(200).send({ message: true })
 }
 
-export const login = async (req: any, res: express.Response) => {
+export const login = async (req: myType['req'], res: express.Response) => {
 	const { username, password } = req.body
 	if (!username || !password) {
 		res.status(400).send({ message: 'Missing required fields' })
@@ -158,25 +155,30 @@ export const login = async (req: any, res: express.Response) => {
 	}
 
 	const user = await User.findOne({ where: { username } })
-	if (!user) {
-		res.status(404).send({ message: 'User not found' })
-		return
-	}
+		.then(async user => {
+			if (!user) {
+				res.status(404).send({ message: 'User not found' })
+				return
+			}
 
-	const verifyPass = await bcrypt.compare(password, user.password)
-	if (!verifyPass) {
-		res.status(403).send({ message: 'Incorrect password' })
-		return
-	}
+			const verifyPass = await bcrypt.compare(password, user.password)
+			if (!verifyPass) {
+				res.status(403).send({ message: 'Incorrect password' })
+				return
+			}
 
-	const accessToken = jwt.sign({ username, password }, JWT_SECRET, { expiresIn: JWT_EXPIRATION })
+			const accessToken = jwt.sign({ username, password }, JWT_SECRET, {
+				expiresIn: JWT_EXPIRATION,
+			})
 
-	req.session.accessToken = accessToken
+			req.session.accessToken = accessToken
 
-	res.status(200).send(user)
+			res.status(200).send(user)
+		})
+		.catch(err => res.status(400).json('Error: ' + err))
 }
 
-export const me = async (req: any, res: express.Response) => {
+export const me = async (req: myType['req'], res: express.Response) => {
 	const { accessToken } = req.session
 
 	if (!accessToken) {
@@ -194,13 +196,13 @@ export const me = async (req: any, res: express.Response) => {
 	res.status(200).send(user)
 }
 
-export const logout = async (req: any, res: express.Response) => {
+export const logout = async (req: myType['req'], res: express.Response) => {
 	const { accessToken } = req.session
 	if (!accessToken) {
 		res.status(401).send({ message: 'You are not logged in' })
 		return
 	}
 
-	req.session.destroy((error: any) => console.error(error))
+	req.session.destroy((error: express.Errback) => console.error(error))
 	res.status(200).send({ message: true })
 }

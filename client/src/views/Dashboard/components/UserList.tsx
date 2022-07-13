@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from '../../../api/axios'
 
-function UserList() {
+const UserList = () => {
 	const [users, setUsers] = useState([])
 
 	useEffect(() => {
@@ -14,7 +14,7 @@ function UserList() {
 				// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 				mounted && setUsers(response.data)
 			} catch (error) {
-				console.log(error)
+				// console.log(error)
 			}
 		}
 		getUsers()

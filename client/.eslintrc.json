@@ -21,7 +21,7 @@
 		"sourceType": "module",
 		"project": "./tsconfig.json"
 	},
-	"plugins": ["react", "@typescript-eslint", "prettier"],
+	"plugins": ["react", "@typescript-eslint", "prefer-arrow", "prettier"],
 	"rules": {
 		"prettier/prettier": ["error", {}, { "usePrettierrc": true }],
 		"indent": ["error", "tab"],
@@ -37,9 +37,9 @@
 		"react/jsx-indent": ["error", "tab"],
 		"react/jsx-indent-props": ["error", "tab"],
 		"react/jsx-props-no-spreading": "warn",
-
-		"no-tabs": "off",
-		"no-shadow": "off",
+		"react/function-component-definition": "off",
+		// "no-tabs": "off",
+		// "no-shadow": "off",
 		"@typescript-eslint/no-shadow": ["error"],
 		"jsx-a11y/no-noninteractive-tabindex": [
 			"warn",
@@ -64,6 +64,16 @@
 				"controlComponents": ["CustomInput"],
 				"depth": 3
 			}
-		]
+		],
+		"prefer-arrow/prefer-arrow-functions": [
+			"error",
+			{
+				"disallowPrototype": true,
+				"singleReturnOnly": true,
+				"classPropertiesAllowed": false
+			}
+		],
+		"prefer-arrow-callback": ["error", { "allowNamedFunctions": true }],
+		"func-style": ["error", "expression", { "allowArrowFunctions": true }]
 	}
 }
