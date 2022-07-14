@@ -2,7 +2,7 @@ import { Formik, Form as FormikForm, Field } from 'formik'
 import * as Yup from 'yup'
 import { Button, Hero, Form, Card, Breadcrumbs, Link } from 'react-daisyui'
 import { Navigate, Route } from 'react-router-dom'
-import Copyright from '../../components/Copyright'
+import { Copyright } from '../../components'
 import { SignUpService } from '../../services/login.service'
 import loginBg from '../../assets/login-bg.svg'
 
