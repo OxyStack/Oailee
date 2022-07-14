@@ -16,8 +16,8 @@ const SignupSchema = Yup.object().shape({
 		.max(50, 'Must be 50 characters or less')
 		.required('Required')
 		.matches(
-			/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^])[A-Za-z\d@$!%*?&]{8,50}$/,
-			'Must contain at least one number, one uppercase letter, one lowercase letter, and one special character',
+			/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^])[A-Za-z\d@$!%*?&#^]{8,50}$/,
+			'Must contain at least one number, one uppercase letter, one lowercase letter, and one special character like @$!%*?&#^',
 		),
 })
 
@@ -31,6 +31,11 @@ const validateUsername = (value: string) => {
 		error = 'No spaces allowed!'
 	}
 	return error
+}
+
+const state = {
+	resStatus: +'',
+	resMessage: '',
 }
 
 const signUp = () => (
@@ -50,14 +55,17 @@ const signUp = () => (
 							password: '',
 						}}
 						validationSchema={SignupSchema}
-						onSubmit={(values) => {
-							const { username, email, password } = values
-
-							SignUpService({ username, email, password })
+						onSubmit={(value, { setSubmitting }) => {
+							setSubmitting(true)
+							SignUpService(value)
 								.then(() => {
 									window.location.href = '/login'
 								})
-								.catch(() => {})
+								.catch((err) => {
+									setSubmitting(false)
+									state.resStatus = err.response.status
+									state.resMessage = err.response.data.message
+								})
 						}}
 					>
 						{({ errors, touched }) => (
@@ -99,6 +107,8 @@ const signUp = () => (
 								<Button type="submit" className="mt-5 bg-primary text-gray-200">
 									Create account
 								</Button>
+								<span className="text-sm text-red-400">{state.resMessage}</span>
+
 								<span className="text-sm text-gray-400 mt-4">
 									Already have an account?
 									<Link href="/login" className="mt-5 text-neutral-content">

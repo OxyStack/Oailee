@@ -2,9 +2,12 @@
 import { Formik, Form as FormikForm, Field } from 'formik'
 import * as Yup from 'yup'
 import { Button, Hero, Form, Card, Breadcrumbs, Link } from 'react-daisyui'
+import { BrowserRouter, Route } from 'react-router-dom'
 import Copyright from '../../components/Copyright'
 import { LoginService } from '../../services/login.service'
 import loginBg from '../../assets/login-bg.svg'
+import localStorageService from '../../services/localStorage.service'
+import Dashboard from '../Dashboard'
 
 const LoginSchema = Yup.object().shape({
 	username: Yup.string().required('Required'),
@@ -44,8 +47,12 @@ const login = () => {
 							validationSchema={LoginSchema}
 							onSubmit={(values, { setSubmitting }) => {
 								LoginService(values)
-									.then(() => {
-										window.location.href = '/dashboard'
+									.then(({ data }) => {
+										;<BrowserRouter>
+											<Route path="/" element={<Dashboard />} />
+										</BrowserRouter>
+
+										localStorageService().set('token', data.accessToken || '')
 									})
 									.catch((err) => {
 										state.resStatus = err.response.status

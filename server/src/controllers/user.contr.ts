@@ -23,11 +23,9 @@ export const signUp = async (req: myType['req'], res: express.Response) => {
 		res.status(400).send({ message: 'Missing required fields' })
 		return
 	}
-	//todo check if username is already taken in a single db query
-	const userName = await User.findOne({ where: { username } })
-	const userEmail = await User.findOne({ where: { email } })
+	const checkUser = await User.findOne({ where: [{ username }, { email }] })
 
-	if (userName || userEmail) {
+	if (checkUser) {
 		res.status(400).send({ message: 'Username or email already taken' })
 		return
 	}
@@ -61,6 +59,7 @@ export const signUp = async (req: myType['req'], res: express.Response) => {
 	const accessToken = jwt.sign({ username, password }, JWT_SECRET, { expiresIn: JWT_EXPIRATION })
 
 	req.session.accessToken = accessToken
+	console.log(req.session)
 
 	await newUser.save()
 	res.status(201).send({ newUser, accessToken })
@@ -173,7 +172,7 @@ export const login = async (req: myType['req'], res: express.Response) => {
 
 			req.session.accessToken = accessToken
 
-			res.status(200).send(user)
+			res.status(200).send({ ...user, accessToken })
 		})
 		.catch(err => res.status(400).json('Error: ' + err))
 }
