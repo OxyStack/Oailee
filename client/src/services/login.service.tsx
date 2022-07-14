@@ -11,11 +11,9 @@ const Logout = () => axios.post<IUser>('/logout')
 axios.interceptors.request.use(
 	(config) => {
 		const token = localStorageService().get('token')
-		console.log(token)
-		if (token && config && config.headers) {
-			// eslint-disable-next-line no-param-reassign
-			config.headers.Authorization = `Bearer ${token}`
-			console.log(config.headers)
+		if (token) {
+			const configWithToken = { ...config, headers: { Authorization: `Bearer ${token}` } }
+			return configWithToken.headers.Authorization ? configWithToken : config
 		}
 		return config
 	},

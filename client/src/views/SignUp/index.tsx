@@ -1,6 +1,7 @@
 import { Formik, Form as FormikForm, Field } from 'formik'
 import * as Yup from 'yup'
 import { Button, Hero, Form, Card, Breadcrumbs, Link } from 'react-daisyui'
+import { Navigate, Route } from 'react-router-dom'
 import Copyright from '../../components/Copyright'
 import { SignUpService } from '../../services/login.service'
 import loginBg from '../../assets/login-bg.svg'
@@ -34,13 +35,13 @@ const validateUsername = (value: string) => {
 }
 
 const state = {
-	resStatus: +'',
+	resStatus: '',
 	resMessage: '',
 }
 
 const signUp = () => (
 	<Hero>
-		<div className=" grid grid-cols-2 w-full">
+		<div className="grid grid-cols-2 w-full">
 			<Card className=" w-96 laptop:w-auto self-center justify-self-center mb-5">
 				<Card.Body>
 					<Breadcrumbs className="self-start mb-10">
@@ -58,9 +59,7 @@ const signUp = () => (
 						onSubmit={(value, { setSubmitting }) => {
 							setSubmitting(true)
 							SignUpService(value)
-								.then(() => {
-									window.location.href = '/login'
-								})
+								.then(() => <Route path="/signup" element={<Navigate to="/signup/success" />} />)
 								.catch((err) => {
 									setSubmitting(false)
 									state.resStatus = err.response.status
